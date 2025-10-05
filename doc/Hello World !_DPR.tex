@@ -1,0 +1,525 @@
+\documentclass[12pt]{article}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{newtxtext, newtxmath}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{enumitem} 
+\usepackage{hyperref}
+\lstdefinestyle{cppstyle}{
+  language=C++,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  stringstyle=\color{orange},
+  commentstyle=\color{gray}\itshape,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  showstringspaces=false,
+  breaklines=true,
+  captionpos=b,
+  frame=single,
+  tabsize=2
+}
+
+
+
+\geometry{
+    a4paper,
+    total={170mm,257mm},
+    left=20mm,
+    top=20mm,
+    margin=1in
+}
+
+
+\onehalfspacing
+\thispagestyle{empty}
+
+
+\definecolor{coregreen}{HTML}{33FF33}
+\definecolor{labblue}{HTML}{3399FF}
+\definecolor{electiveorange}{HTML}{FF9933}
+
+
+\begin{document}
+
+\begin{center}
+    \textbf{Detailed Project Report} \\[0.5cm]
+    \textbf{on} \\[0.5cm]
+    \textbf{\LARGE Automated Time-table scheduling for IIIT Dharwad} \\[1cm]
+
+    \textit{SUBMITTED BY} \\[0.3cm]
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\linewidth]{image12.png}
+    \label{fig:placeholder}
+\end{figure}
+    \textbf{NIHAL SINGH \\ 24BCS085} \\ [0.4cm]
+    \textbf{NIRBHAY KUMAR \\ 24BCS089} \\[0.4cm]
+    \textbf{NISCHAY R GOWDA \\ 24BCS090} \\[0.4cm]
+    \textbf{V MARUTHI \\ 24BCS159} \\[0.45cm]
+
+    Under the guidance of \\[0.7cm]
+    \textbf{Dr. Vivekraj V K} \\[0.3cm]
+    \textbf{Assistant Professor, Department of CSE} \\
+    \vfill
+
+    \includegraphics[width=0.5\linewidth]{image7.png}
+    \vfill
+
+    \textbf{DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING} \\
+    \textbf{INDIAN INSTITUTE OF INFORMATION TECHNOLOGY DHARWAD} \\[0.5cm]
+    \textbf{\today}
+\end{center}
+
+\newpage
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+
+\section{Introduction}
+Creating and maintaining a timetable at IIIT Dharwad is a complex scheduling task that goes beyond simply listing class hours. Traditional formats such as spreadsheets, PDFs, and static images, while informative, are rigid and fail to adapt to real-time changes. They lack cross-platform accessibility and do not provide features like instant updates or reminders, leaving faculty and students vulnerable to missed classes, scheduling conflicts, and inefficient time management.
+
+Manual timetable creation is labor-intensive and prone to errors. Factors such as course structures, lab sessions, classroom allocation, faculty availability, and adequate break times must be considered simultaneously. As the number of students and courses grows, these manual methods become increasingly time-consuming and impractical in a fast-paced academic environment.
+
+To address these issues, the \textbf{Automated Time-Table Scheduling System} aims to provide a dynamic, intelligent, and scalable alternative to traditional methods. By incorporating advanced scheduling algorithms, real-time updates, and modern technologies, this system ensures optimal resource utilization, minimal conflicts, and seamless accessibility for students and faculty alike.
+
+\subsection{Objectives}
+The proposed system is designed to:
+\begin{itemize}
+    \item Generate conflict-free, optimized timetables that respect academic and administrative constraints.
+    \item Provide real-time updates and instant notifications, eliminating the need for manual adjustments.
+    \item Offer cross-platform access, including synchronization with Google Calendar for mobile reminders.
+    \item Enable dynamic rescheduling in case of faculty absence, public holidays, or weather-related disruptions.
+\end{itemize}
+
+\subsection{System Features and Constraints} 
+The system incorporates the following functionalities and design considerations:
+\begin{itemize}
+    \item \textbf{Availability Tracking:} Professors, classrooms, laboratories, lab assistants, and enrolled students.
+    \item \textbf{User Inputs:}
+    \begin{itemize}
+        \item \textbf{Course Code:} e.g., CS101
+        \item \textbf{Course Name:} e.g., Data Structures and Algorithms
+        \item \textbf{LTPSC Structure:} e.g., 3-1-2-0-4 (Lectures-Tutorials-Practicals-Self-study-Credits)
+        \item \textbf{Instructor:} e.g., Dr. A. Kumar
+        \item \textbf{Course Offered To:} e.g., B.Tech CSE, Semester 3
+    \end{itemize}
+    \item Allocate dedicated study hours to provide sufficient preparation time between lectures.
+    \item Avoid continuous classes for professors by ensuring a minimum 3-hour gap between two sessions.
+    \item Restrict one lecture/tutorial per day per course to promote balanced learning.
+    \item Schedule lunch breaks within the mess timing to avoid clashes.
+    \item Provide \textbf{color-coded timetables} for quick visual recognition:
+    \begin{itemize}
+        \item \textcolor{coregreen}{Green for Core Courses}
+        \item \textcolor{labblue}{Blue for Labs}
+        \item \textcolor{electiveorange}{Orange for Electives}
+    \end{itemize}
+    \item Group labs on the same day as their corresponding lecture to enhance retention and application.
+    \item Support \textbf{dynamic rescheduling} for half-semester courses to avoid overlap with full-semester ones.
+    \item Ensure elective and minor courses share common slots across batches to prevent conflicts.
+    \item \textbf{Vision-based automation:} Detect empty classrooms via CCTV for instant reallocation.
+    \item \textbf{QR code integration:} Students can scan to view their updated personal timetable after any change.
+    \item \textbf{AI-powered suggestions:} Recommend optimal lab batches based on attendance patterns.
+    \item \textbf{Weather-based rescheduling:} Automatically shift physical classes to online mode during heavy rains.
+\end{itemize}
+
+
+\section{Existing System}
+Present Manual Approach to Timetable Scheduling at IIIT Dharwad Timetable scheduling at IIIT Dharwad is currently carried out using a manual, slot-based system with the help of spreadsheets and static timetable templates. While this method provides a structured framework, it is still largely dependent on human coordination and adjustments, making it less adaptive to dynamic changes.
+\subsection{Understanding LTPSC} 
+\textbf{L} – Lectures, \quad
+\textbf{T} – Tutorials, \quad
+\textbf{P} – Practicals/Labs, \quad
+\textbf{S} – Seminars, \quad
+\textbf{C} – Credits.
+
+\textit{Example:} \texttt{3-0-2-0-4} = 3 hours lecture, 0 tutorials, 2 labs, 0 seminars, 4 credits.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{image18.png}
+    \caption{Use-Case Diagram 1.1}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{image19.png}
+    \caption{Use-Case Diagram 1.2}
+    \label{fig:placeholder}
+\end{figure}
+
+\subsection{Current timetable}
+At most institutions, timetables are created manually using spreadsheets, shared documents, or emails. Department heads, faculty, and admin staff coordinate to assign courses, time slots, and classrooms.
+
+The process usually involves:
+\begin{itemize}
+    \item Listing courses and faculty assignments.
+    \item Checking faculty teaching loads and preferences.
+    \item Allocating classrooms based on class size.
+    \item Distributing lectures, tutorials, and labs into weekly slots.
+\end{itemize}
+
+The final timetable is shared as a static PDF or print copy. Any change requires manual edits and redistribution.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{image.png}
+    \caption{Existing Timetable}
+    \label{fig:existing-timetable} % Unique label
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{image2.png}
+    \caption{Timetable Courses}
+    \label{fig:timetable-courses} % Unique label
+\end{figure}
+
+\subsection{Comparison of Timetable Examples}
+The two provided timetables represent schedules for the same academic program but with noticeable differences in timing, course allocation, and facilities. The key observations are:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Timing Differences:}
+\begin{itemize}
+    \item The first timetable starts with a 9:00 AM session, whereas the second timetable begins earlier at 7:30 AM.
+    \item The first timetable has defined morning and lunch breaks, whereas the second timetable’s breaks are less explicitly defined but have minor slots.
+    \item The second timetable has minor slots indicated between 18:00-18:45 and 18:45-19:30, which are not present in the first timetable.
+\end{itemize}
+
+\item \textbf{Course and Slot Allocations:}
+\begin{itemize}
+    \item Both timetables include similar courses like IET, Economics, Open Electives, and lab sessions, but their timings and batch distributions vary.
+    \item The second timetable appears to have additional course slot divisions with detailed abbreviations (e.g., LI-1H, LU-2T), possibly indicating lab/tutorial hours more precisely.
+    \item The first timetable shows lab sessions labeled with specific room numbers (e.g., L207, L208), while the second timetable uses codes like “LI”, “LU”, etc.
+\end{itemize}
+
+\item \textbf{Facilities and Room Usage:}
+\begin{itemize}
+    \item The first timetable assigns specific classrooms for labs and tutorials, facilitating better classroom management.
+    \item The second timetable indicates multiple minor slots possibly for extra classes or remedial sessions.
+    \item Both timetables provide batch-wise distinctions (Batch B1, B2) but their scheduling differs, reflecting changes in classroom or batch management.
+\end{itemize}
+
+\item \textbf{Break and Minor Slot Management:}
+\begin{itemize}
+    \item The first timetable has designated break times, with a clear lunch break and morning break.
+    \item The second timetable includes multiple minor slots throughout the day which may indicate more flexibility or additional session types.
+\end{itemize}
+\end{itemize}
+
+The changes between the two timetables primarily reflect optimization in timing, session management, and finer classroom assignment details. The second timetable introduces earlier start times and minor slots possibly for enhanced academic support, while the first timetable offers a more traditional schedule with defined breaks and batch-wise lab allocation.
+
+\subsection{Limitations of current timetable}
+From the existing figures:
+\begin{itemize}
+    \item Fixed grids (Figure 1) are clear but hard to reschedule.
+    \item Course-slot mapping (Figure 2) is helpful but doesn’t prevent clashes.
+\end{itemize}
+
+Other problems:
+\begin{itemize}
+    \item Manual checks cause scheduling conflicts.
+    \item Overlapping classroom bookings.
+    \item Poorly planned breaks.
+    \item No calendar integration.
+    \item Difficulty managing labs and electives without overlaps.
+    \item Accessibility issues — no live updates.
+\end{itemize}
+
+
+\subsection*{Advantages vs Disadvantages}
+\begin{longtable}{|p{0.5cm}|p{7cm}|p{7cm}|}
+\hline
+\# & Advantages & Disadvantages \\ \hline
+1 & Human oversight and flexibility. & Time-consuming and error-prone. \\ \hline
+2 & Low-tech — simple tools suffice. & Hard to update and redistribute. \\ \hline
+3 & Customization per department. & No live synchronization or scalability. \\ \hline
+\end{longtable}
+
+\subsection*{Summary}
+The manual system is flexible and simple but inefficient and prone to errors. Moving to an automated system with optimization algorithms can resolve most issues while keeping human control where needed.
+
+\newpage
+\section{Requirements Modeling}
+
+\subsection{List of Requirements}
+\begin{longtable}{|p{1cm}|p{14cm}|}
+\caption{List of requirements table}
+\label{tab:requirements} \\ \hline
+\textbf{No.} & \textbf{Requirement Description} \\ \hline
+\endfirsthead
+\multicolumn{2}{c}
+{{\bfseries \tablename\ \thetable{} -- continued from previous page}} \\
+\hline
+\textbf{No.} & \textbf{Requirement Description} \\ \hline
+\endhead
+\hline \multicolumn{2}{r}{{Continued on next page}} \\ \endfoot
+\endlastfoot
+1 & \textbf{One Lecture Slot Per Course Per Day:} A single course must have only one lecture scheduled per day to avoid redundancy and cognitive overload. \\ \hline
+2 & \textbf{Refresh Breaks:} Allocate a 10-minute break after each class. \\ \hline
+3 & \textbf{Fixed Lunch Break:} Schedule a fixed lunch break aligned with mess timings. \\ \hline
+4 & \textbf{Color-Coded Timetable:} Use distinct colors to represent different courses. \\ \hline
+5 & \textbf{Lab and Lecture on Same Day:} Schedule the lab session on the same day as the lecture. \\ \hline
+6 & \textbf{Google Calendar Integration:} Integrate timetable with Google Calendar. \\ \hline
+7 & \textbf{Half-Semester Course Handling:} Schedule half-semester courses in their designated half. \\ \hline
+8 & \textbf{Common Slot for Electives:} Assign common elective slots across departments. \\ \hline
+9 & \textbf{Resource Availability Tracking:} Ensure faculty, classrooms, and facilities are available before scheduling. \\ \hline
+10 & \textbf{Course Detail Input:} Allow input for code, title, LTPSC structure, instructor, semester, and enrollment count. \\ \hline
+11 & \textbf{Self-Study Hours:} Allocate specific self-study slots. \\ \hline
+12 & \textbf{Faculty Gap Between Classes:} Maintain at least a three-hour gap between a faculty member’s classes. \\ \hline
+\end{longtable}
+
+\section{Exam Scheduling \& Seating (Add-on Requirement)}
+\textbf{Goal:} Since the class timetable is being automated, the software must also automate the \emph{exam timetable}, \emph{classroom assignment}, and \emph{seating arrangement}.
+
+\paragraph{Core Requirements}
+\begin{description}[leftmargin=2.8cm, style=nextline, itemsep=0.25em]
+    \item[Exam Timetable Generation] Produce a conflict-free exam schedule: no student should have two exams at the same time; respect exam duration and buffer times between slots.
+    \item[Classroom Assignment] Allocate classrooms for exams based on seating capacity and accessibility.
+    \item[Seating Arrangement] \emph{Constraint:} No two students writing the same exam should occupy the same desk. For dual benches, enforce alternate seating or mix with other courses.
+    \item[Exportable Outputs] Generate per-room seating charts, per-student hall tickets (with room/seat), invigilator duty lists, and attendance sheets. Export in PDF/CSV formats.
+\end{description}
+
+\paragraph{Seating Policy Details}
+\begin{itemize}[leftmargin=*, itemsep=0.25em]
+    \item \textbf{Desk Rule:} No two students of the same exam at the same desk.
+    \item \textbf{Interleaving:} Prefer mixing different exams in one room when capacity requires.
+    \item \textbf{Mapping:} Seat assignment based on roll numbers to maintain reproducibility.
+\end{itemize}
+
+\paragraph{Acceptance Criteria}
+\begin{itemize}[leftmargin=*, itemsep=0.25em]
+    \item Each student has at most one exam per time slot.
+    \item Room capacity never exceeded.
+    \item Seating plan always satisfies Desk Rule.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{image20.png}
+    \caption{Level 0 DFD}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{image23.png}
+    \caption{Level 1 DFD}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{image24.png}
+    \caption{Level 2 DFD}
+    \label{fig:placeholder}
+\end{figure}
+\subsection{Data Dictionary}
+
+\begin{itemize}
+    \item Course-Details: \{Course-ID: string, Course-Name: string, Credits: integer, Department: string, Semester: integer, Duration: integer\}
+    \item Faculty-Details: \{Faculty-ID: string, Faculty-Name: string, Dept: string, Availability: timeslot, Assigned-Courses: list\}
+    \item Student-Registration: \{Student-ID: string, Name: string, Program: string, Semester: integer, Registered-Courses: list\}
+    \item Resource-Availability: \{Resource-ID: string, Type: string, Capacity: integer, Availability: timeslot\}
+
+    \item Institutional-Constraints: \{Constraint-ID: string, Constraint-Description: string\}
+
+    \item Scheduling-Rules: \{Rule-ID: string, Rule-Type: string, Priority: integer\}
+
+    \item Draft-Timetable: \{Timetable-ID: string, Course-Schedule: list, Faculty-Allocation: list, Room-Allocation: list\}
+
+    \item Validation-Feedback: \{Feedback-ID: string, From: Faculty/Student, Conflict-Details: string, Status: string\}
+ 
+    \item Finalized-Timetable: \{Draft-Timetable + {Approval-Status: string}\}
+
+    \item Faculty-Timetable: \{Faculty-ID: string, Assigned-Courses: list, Schedule: list\}
+
+    \item Student-Timetable: \{Student-ID: string, Registered-Courses: list, Schedule: list\}
+
+    \item Generated-Timetable: \{Draft: Draft-Timetable, Final: Finalized-Timetable\}
+
+    \item Calendar-Event: \{Event-ID: string, Course: string, Faculty: string, Room: string, Time: datetime\}
+\end{itemize}
+\newpage
+\section{High-Level \& Low-Level Design}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{image26.png}
+    \caption{High-Level Design 1.1 }
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{image27.png}
+    \caption{High-Level Design 1.2 (Input)}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{image28.png}
+    \caption{High-Level Diagram 1.3 (Output)}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{image29.png}
+    \caption{High-Level Design 1.4 (Process)}
+    \label{fig:placeholder}
+\end{figure}
+\section*{Low-Level Design}
+\section*{Data Structures}
+
+\begin{lstlisting}[style=cppstyle, caption=Faculty Information]
+struct Faculty {
+    int facultyID;
+    string name;
+    vector<string> courses;         // Courses taught
+    vector<string> availableSlots;  // Time slots available
+};
+\end{lstlisting}
+
+\begin{lstlisting}[style=cppstyle, caption=Course Information]
+struct Course {
+    string courseCode;
+    string courseName;
+    int credits;
+    string facultyID;
+    vector<string> preferredSlots;
+};
+\end{lstlisting}
+
+\begin{lstlisting}[style=cppstyle, caption=Classroom/Lab Information]
+struct Room {
+    string roomID;
+    int capacity;
+    bool isLab;
+    vector<string> availableSlots;
+};
+\end{lstlisting}
+
+\begin{lstlisting}[style=cppstyle, caption=Exam Information]
+struct Exam {
+    string courseCode;
+    string examDate;
+    string roomID;
+};
+\end{lstlisting}
+
+\begin{lstlisting}[style=cppstyle, caption=Timetable Entry]
+struct TimeTableEntry {
+    string day;
+    string timeSlot;
+    string courseCode;
+    string facultyID;
+    string roomID;
+};
+\end{lstlisting}
+
+\begin{lstlisting}[style=cppstyle, caption=Timetable]
+struct TimeTable {
+    vector<TimeTableEntry> entries;
+};
+\end{lstlisting}
+
+\section*{Function Declarations and Descriptions}
+
+\subsection*{1. Admin Module}
+\begin{lstlisting}[style=cppstyle]
+void inputSubjects(vector<Course>& courseList);
+void inputExams(vector<Exam>& examList);
+void inputRooms(vector<Room>& roomList);
+void finalizeTimeTable(TimeTable& tt);
+\end{lstlisting}
+
+\subsection*{2. Faculty Module}
+\begin{lstlisting}[style=cppstyle]
+void provideAvailability(Faculty& f, vector<string> slots);
+void viewFacultyTimeTable(Faculty f, TimeTable tt);
+\end{lstlisting}
+
+\subsection*{3. Student Module}
+\begin{lstlisting}[style=cppstyle]
+void requestTimeTable(string studentID);
+void viewStudentTimeTable(string studentID, TimeTable tt);
+\end{lstlisting}
+
+\subsection*{4. Course Management Module}
+\begin{lstlisting}[style=cppstyle]
+void collectCourseDetails(Course& c);
+void updateCourseDetails(Course& c, string newName, int newCredits);
+\end{lstlisting}
+
+\subsection*{5. Faculty Management Module}
+\begin{lstlisting}[style=cppstyle]
+void collectFacultyInfo(Faculty& f);
+void updateFacultyDetails(Faculty& f, vector<string> newCourses);
+\end{lstlisting}
+
+\subsection*{6. Time-Table Generation Module}
+\begin{lstlisting}[style=cppstyle]
+void collectDetails(vector<Course> courses, vector<Faculty> faculties, vector<Room> rooms);
+void applySchedulingRules(TimeTable& tt, vector<Course> courses, vector<Faculty> faculties, vector<Room> rooms);
+void generateTimeTable(TimeTable& tt, vector<Course> courses, vector<Faculty> faculties, vector<Room> rooms, vector<Exam> exams);
+bool validateTimeTable(TimeTable tt);
+\end{lstlisting}
+
+\subsection*{7. Database Management Module}
+\begin{lstlisting}[style=cppstyle]
+void saveCourseDB(vector<Course> courses);
+vector<Course> loadCourseDB();
+
+void saveFacultyDB(vector<Faculty> faculties);
+vector<Faculty> loadFacultyDB();
+
+void saveExamDB(vector<Exam> exams);
+vector<Exam> loadExamDB();
+
+void saveRoomDB(vector<Room> rooms);
+vector<Room> loadRoomDB();
+
+void saveTimeTableDB(TimeTable tt);
+TimeTable loadTimeTableDB();
+\end{lstlisting}
+
+\subsection*{8. View/Retrieve Timetable Module}
+\begin{lstlisting}[style=cppstyle]
+TimeTable retrieveFinalTimeTable();
+void viewTimeTable(TimeTable tt, string userType, string userID);
+\end{lstlisting}
+
+\section{Conclusion}
+A well-designed timetable is more than just a schedule---it is a strategic plan that balances teaching effectiveness, student convenience, and resource optimization. Implementing the above guidelines ensures that the timetable is fair, flexible, and future-ready.
+
+By integrating modern features such as color coding and calendar synchronization, while respecting human factors like break times, meal schedules, and classroom capacity, institutions can significantly improve the learning environment.
+
+Automating this process reduces human error and increases flexibility for last-minute changes, ensuring the timetable remains a living document---adaptable, accessible, and future-ready.
+
+\section{Coding/Implementation}
+Tech Stack
+
+\begin{itemize}
+    \item Programming Language: C++ / Python (for scheduling algorithms and data structures)
+    \item Database: SQLite / JSON-based lightweight storage
+    \item Version Control: Git and GitHub
+    \item Visualization: Matplotlib / Web UI for timetable display
+    \item Export Formats: PDF, CSV
+    \item Optional: Integration with Google Calendar API
+
+GiT repository link: https://github.com/FuriousYETI/Automatic-Time-Table-Generation-Hello-World-.git
+\end{itemize}
+\section{References} % Changed to plural
+{ % Scoping the \large command
+\large
+The reference materials include current professor lectures and the existing timetable.
+}
+
+
+\end{document}
