@@ -1,11 +1,11 @@
-## Automated Time-Table Scheduling for IIIT Dharwad
+# Automated Time-Table Scheduling for IIIT Dharwad
 # Introduction
 
 - Creating and maintaining a timetable at IIIT Dharwad is a complex scheduling task. The existing manual, slot-based method using spreadsheets or PDFs is rigid, error-prone, and time-consuming.
 
 - This project aims to automate timetable generation using intelligent scheduling algorithms to ensure optimized, conflict-free, and dynamic timetables. The system will also integrate with Google Calendar and support additional modules such as exam scheduling and seating arrangements.
 
-## Objectives
+# Objectives
 
 - Generate conflict-free and optimized timetables while respecting academic and administrative constraints.
 
@@ -17,8 +17,8 @@
 
 - Extend functionality to exam timetable generation and seating arrangements.
 
-## Features
-# Availability Tracking
+# Features
+## Availability Tracking
 Tracks availability for:
 
 - Professors
@@ -41,7 +41,7 @@ Accepts details such as:
 
 - Semester and department
 
-## Rules Enforced
+# Rules Enforced
 
 - One lecture per course per day
 
@@ -53,7 +53,7 @@ Accepts details such as:
 
 - Dynamic rescheduling for half-semester vs. full-semester courses
 
-## Color-Coded Timetable
+# Color-Coded Timetable
 
 - Core Courses – Green
 
@@ -61,7 +61,7 @@ Accepts details such as:
 
 - Electives – Orange
 
-## Exam Module
+# Exam Module
 
 - Generates conflict-free exam schedules
 
@@ -70,7 +70,7 @@ Accepts details such as:
 - Produces hall tickets for students
 
 
-## Future Enhancements
+# Future Enhancements
 
 - Web-based dashboard for admin and faculty access
 
@@ -78,8 +78,7 @@ Accepts details such as:
 
 - Integration with attendance and academic performance systems
 
-## Team Members
-- Name	Roll Number
+# Team Members
 - Nihal Singh	24BCS085
 - Nirbhay Kumar	24BCS089
 - Nischay R Gowda	24BCS090
