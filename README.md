@@ -24,3 +24,9 @@ Dynamic Rescheduling: Handles half-semester vs full-semester clashes.
 Color-Coded Timetable: Core courses (green), Labs (blue), Electives (orange).
 
 Exam Module: Generates conflict-free exam schedules, seating charts, invigilator duty lists, and hall tickets.
+
+Team Members:
+Nihal Singh (24BCS085)
+Nirbhay Kumar (24BCS089)
+Nischay R Gowda (24BCS090)
+V Maruthi (24BCS159)
