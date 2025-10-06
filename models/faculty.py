@@ -1,0 +1,17 @@
+FACULTY_DATA = [
+    {"id": 101, "name": "Dr. Anand Bar", "department": "Mathematics"},
+    {"id": 102, "name": "Dr. Somen Bhattacharjee", "department": "Mathematics"},
+    {"id": 201, "name": "Dr. Suvadip Harma", "department": "Computer Science"},
+    {"id": 202, "name": "Dr. Sunil P V", "department": "Computer Science"},
+    {"id": 203, "name": "Dr. Vivekraj", "department": "Computer Science"},
+    {"id": 204, "name": "Dr. Malay", "department": "Computer Science"},
+    {"id": 205, "name": "Dr. Pramod Y", "department": "Computer Science"},
+    {"id": 206, "name": "Dr. Prabhu Prasad BM", "department": "Computer Science"},
+    {"id": 301, "name": "Dr. Pankaj", "department": "Electronics"},
+    {"id": 207, "name": "Dr. Deepak K T", "department": "HSS"},
+    {"id": 208, "name": "Dr. Animesh Roy", "department": "Computer Science"},
+    {"id": 209, "name": "Dr. Shirshendu L", "department": "HSS"},
+    {"id": 210, "name": "Prof. Chachadi", "department": "HSS"},
+    {"id": 211, "name": "Dr. Chandrika K", "department": "HSS"},
+    {"id": 212, "name": "Dr. Sandesh Phalke", "department": "HSS"},
+]
