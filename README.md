@@ -1,85 +1,79 @@
-Automated Time-Table Scheduling for IIIT Dharwad
-Introduction
+# Automated Time-Table Scheduling for IIIT Dharwad
+# Introduction
 
-Creating and maintaining a timetable at IIIT Dharwad is a complex scheduling task. The existing manual, slot-based method using spreadsheets or PDFs is rigid, error-prone, and time-consuming.
+- Creating and maintaining a timetable at IIIT Dharwad is a complex scheduling task. The existing manual, slot-based method using spreadsheets or PDFs is rigid, error-prone, and time-consuming.
 
-This project aims to automate timetable generation using intelligent scheduling algorithms to ensure optimized, conflict-free, and dynamic timetables. The system will also integrate with Google Calendar and support additional modules such as exam scheduling and seating arrangements.
+- This project aims to automate timetable generation using intelligent scheduling algorithms to ensure optimized, conflict-free, and dynamic timetables. The system will also integrate with Google Calendar and support additional modules such as exam scheduling and seating arrangements.
 
-Objectives
+# Objectives
 
-Generate conflict-free and optimized timetables while respecting academic and administrative constraints.
+- Generate conflict-free and optimized timetables while respecting academic and administrative constraints.
 
-Provide real-time updates and cross-platform accessibility.
+- Provide real-time updates and cross-platform accessibility.
 
-Integrate with Google Calendar for synchronization and reminders.
+- Integrate with Google Calendar for synchronization and reminders.
 
-Support rescheduling during faculty absence, holidays, or weather disruptions.
+- Support rescheduling during faculty absence, holidays, or weather disruptions.
 
-Extend functionality to exam timetable generation and seating arrangements.
+- Extend functionality to exam timetable generation and seating arrangements.
 
-Features
-Availability Tracking
+# Features
+## Availability Tracking
 
 Tracks availability for:
 
-Professors
+- Professors
 
-Classrooms
+- Classrooms
 
-Laboratories
+- Laboratories
 
-Student batches
+- Student batches
 
-Input Support
+## Input Support
 
 Accepts details such as:
 
-Course code and name
+- Course code and name
 
-LTPSC structure
+- LTPSC structure
 
-Instructor information
+- Instructor information
 
-Semester and department
+- Semester and department
 
-Rules Enforced
+## Rules Enforced
 
-One lecture per course per day
+- One lecture per course per day
 
-Fixed lunch and refresh breaks
+- Fixed lunch and refresh breaks
 
-Minimum three-hour gap between classes for faculty
+- Minimum three-hour gap between classes for faculty
 
-Labs scheduled on the same day as corresponding lectures
+- Labs scheduled on the same day as corresponding lectures
 
-Dynamic rescheduling for half-semester vs. full-semester courses
+- Dynamic rescheduling for half-semester vs. full-semester courses
 
-Color-Coded Timetable
+## Color-Coded Timetable
 
-Core Courses – Green
+- Core Courses – Green
 
-Labs – Blue
+- Labs – Blue
 
-Electives – Orange
+- Electives – Orange
 
-Exam Module
+# Future Enhancements
 
-Generates conflict-free exam schedules
+- Web-based dashboard for admin and faculty access
 
-Creates seating charts and invigilator duty lists
+- AI-based optimization to minimize scheduling conflicts
 
-Produces hall tickets for students
-
-Team Members
+- Integration with attendance and academic performance systems
+  
+# Team Members
 Name	Roll Number
-Nihal Singh	24BCS085
-Nirbhay Kumar	24BCS089
-Nischay R Gowda	24BCS090
-V Maruthi	24BCS159
-Future Enhancements
+- Nihal Singh	24BCS085
+- Nirbhay Kumar	24BCS089
+- Nischay R Gowda	24BCS090
+- V Maruthi	24BCS159
 
-Web-based dashboard for admin and faculty access
-
-AI-based optimization to minimize scheduling conflicts
-
-Integration with attendance and academic performance systems
