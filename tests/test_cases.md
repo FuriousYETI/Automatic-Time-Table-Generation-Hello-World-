@@ -1,4 +1,4 @@
-# 🧪 Unit Test Cases for Timetable Generation Functions
+# Unit Test Cases for Timetable Generation Functions
 
 | **Test Case Input** | **Description** | **Expected Output** |
 |----------------------|------------------|----------------------|
