@@ -1,0 +1,10 @@
+{
+  "duration_constants": {
+    "hour_slots": 2,
+    "lecture_duration": 3,
+    "lab_duration": 4,
+    "tutorial_duration": 2,
+    "self_study_duration": 2,
+    "break_duration": 1
+  }
+}
