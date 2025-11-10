@@ -293,7 +293,13 @@ def generate_all_timetables():
     for department in df['Department'].unique():
         sems = sorted(df[df['Department'] == department]['Semester'].unique())
         for semester in sems:
-            num_sections = 2 if (str(department).strip() == "CSE" and int(semester) in [2, 4, 6]) else 1
+# ---------------------------
+# Section and Priority Rules
+# ---------------------------
+
+# Give 2 sections for CSE, ECE, and DSAI in semesters 2, 4, 6
+            dept_upper = str(department).strip().upper()
+            num_sections = 2 if (dept_upper in ["CSE", "ECE", "DSAI"] and int(semester) in [2, 4, 6]) else 1
 
             courses = df[(df['Department'] == department) & (df['Semester'] == semester)]
             if 'Schedule' in courses.columns:
@@ -301,6 +307,7 @@ def generate_all_timetables():
             if courses.empty:
                 continue
 
+            # Split into lab and non-lab courses
             if 'P' in courses.columns:
                 lab_courses = courses[courses['P'] > 0].copy()
                 non_lab_courses = courses[courses['P'] == 0].copy()
@@ -308,12 +315,25 @@ def generate_all_timetables():
                 lab_courses = courses.head(0)
                 non_lab_courses = courses.copy()
 
+            # Priority by total workload (L + T + P)
             if not lab_courses.empty:
                 lab_courses['priority'] = lab_courses.apply(get_course_priority, axis=1)
                 lab_courses = lab_courses.sort_values('priority', ascending=False)
             non_lab_courses['priority'] = non_lab_courses.apply(get_course_priority, axis=1)
             non_lab_courses = non_lab_courses.sort_values('priority', ascending=False)
-            courses_combined = pd.concat([lab_courses, non_lab_courses]).drop_duplicates()
+
+            # --- ELECTIVE PRIORITY LOGIC ---
+            def is_elective(course_row):
+                name = str(course_row.get('Course Name', '')).lower()
+                code = str(course_row.get('Course Code', '')).lower()
+                keywords = ["elective", "oe", "open elective", "pe", "program elective"]
+                return any(k in name for k in keywords) or any(k in code for k in keywords)
+
+            combined = pd.concat([lab_courses, non_lab_courses])
+            combined['is_elective'] = combined.apply(is_elective, axis=1)
+
+            # Electives first, then core — higher total workload within each group
+            courses_combined = combined.sort_values(by=['is_elective', 'priority'], ascending=[False, False]).drop_duplicates()
 
             for section in range(num_sections):
                 section_title = f"{department}_{semester}" if num_sections == 1 else f"{department}_{semester}_{chr(65 + section)}"
@@ -338,6 +358,21 @@ def generate_all_timetables():
                         except StopIteration:
                             section_subject_color[code] = random.choice(SUBJECT_COLORS)
                         course_faculty_map[code] = select_faculty(c.get('Faculty', 'TBD'))
+                # --- PRIORITIZE ELECTIVES FIRST ---
+                def is_elective(course_name):
+                    if pd.isna(course_name):
+                        return False
+                    name = str(course_name).lower()
+                    keywords = ["elective", "oe", "open elective", "pe", "program elective"]
+                    return any(k in name for k in keywords)
+
+                # Separate electives and non-electives
+                elective_courses = courses_combined[courses_combined['Course Name'].apply(is_elective)]
+                core_courses = courses_combined[~courses_combined['Course Name'].apply(is_elective)]
+
+                # Recombine — electives first, then core
+                courses_combined = pd.concat([elective_courses, core_courses])
+
 
                 for _, course in courses_combined.iterrows():
                     code = str(course.get('Course Code', '')).strip()
