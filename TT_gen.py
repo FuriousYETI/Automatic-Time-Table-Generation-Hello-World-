@@ -1,24 +1,37 @@
 # TT_gen.py -- Timetable generator with room allocation and global room conflict avoidance
 # Run: python TT_gen.py
 # Requires: pandas, openpyxl
+
+
 import pandas as pd
 import random
 from datetime import datetime, time, timedelta
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Font
 from openpyxl.utils import get_column_letter
 from dataclasses import dataclass
 import traceback
-from datetime import date, timedelta
+import os
+import sys
+import json
+
+
 # ---------------------------
 # Constants and durations (minutes)
 # ---------------------------
-DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+try:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+        config = json.load(f)
+except Exception:
+    config = {}
 
-LECTURE_MIN = 90   # 1.5 hours
-LAB_MIN = 120      # 2 hours
-TUTORIAL_MIN = 60  # 1 hour
-SELF_STUDY_MIN = 60
+DAYS = config.get("days", ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'])
+LECTURE_MIN = config.get("LECTURE_MIN", 90)   # 1.5 hours
+LAB_MIN = config.get("LAB_MIN", 120)       # 2 hours (as used in your code)
+TUTORIAL_MIN = config.get("TUTORIAL_MIN", 60)  # 1 hour
+SELF_STUDY_MIN = config.get("SELF_STUDY_MIN", 60)
 
 # Break windows
 MORNING_BREAK_START = time(10, 30)
@@ -41,16 +54,19 @@ class UnscheduledComponent:
     section: int
     reason: str
 
+
+INPUT_DIR = os.path.join(BASE_DIR, "inputs")
+OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
 # ---------------------------
 # Load CSVs
 # ---------------------------
 try:
-    df = pd.read_csv('combined.csv')
+    df = pd.read_csv(os.path.join(INPUT_DIR, 'combined.csv'))
 except FileNotFoundError:
     raise SystemExit("Error: 'combined.csv' not found in working directory.")
 
 try:
-    rooms_df = pd.read_csv('rooms.csv')
+    rooms_df = pd.read_csv(os.path.join(INPUT_DIR, 'rooms.csv'))
 except FileNotFoundError:
     rooms_df = pd.DataFrame(columns=['roomNumber', 'type'])
 
@@ -101,7 +117,12 @@ def slot_minutes(slot):
     return e_m - s_m
 
 def overlaps(a_start, a_end, b_start, b_end):
-    return (a_start < b_end) and (b_start < a_end)
+    # input times or time objects - convert to minutes-of-day where needed
+    a_s_min = a_start.hour*60 + a_start.minute
+    a_e_min = a_end.hour*60 + a_end.minute
+    b_s_min = b_start.hour*60 + b_start.minute
+    b_e_min = b_end.hour*60 + b_end.minute
+    return (a_s_min < b_e_min) and (b_s_min < a_e_min)
 
 def is_break_time_slot(slot, semester=None):
     start, end = slot
@@ -261,8 +282,35 @@ def load_batch_data():
 # ---------------------------
 # Main generation function
 # ---------------------------
+def record_unscheduled(unscheduled_dict, code, dept, sem, reason):
+    """
+    Adds an unscheduled course to a dictionary only once.
+    Prevents duplicate entries and stores the reason.
+    """
+    if code not in unscheduled_dict:
+        unscheduled_dict[code] = {
+            "Course Code": code,
+            "Department": dept,
+            "Semester": sem,
+            "Reason": reason
+        }
+def add_unscheduled_course(unscheduled_components, department, semester, code, name, faculty, comp_type, section, reason):
+    """
+    Prevent duplicate unscheduled entries for the same course.
+    If the course already exists, append component info to its reason.
+    """
+    existing = next((u for u in unscheduled_components if u.code == code), None)
+    if existing:
+        if comp_type not in existing.component_type:
+            existing.component_type += f", {comp_type}"
+        if reason not in existing.reason:
+            existing.reason += f"; {reason}"
+    else:
+        unscheduled_components.append(UnscheduledComponent(department, semester, code, name, faculty, comp_type, 1, section, reason))
+
 def generate_all_timetables():
     global TIME_SLOTS
+    unscheduled_dict = {}
     TIME_SLOTS = generate_time_slots()
     rooms = load_rooms()
     batch_info = load_batch_data()
@@ -297,9 +345,11 @@ def generate_all_timetables():
 # Section and Priority Rules
 # ---------------------------
 
-# Give 2 sections for CSE, ECE, and DSAI in semesters 2, 4, 6
+# Give 2 sections for CSE semesters 2, 4, 6
+
             dept_upper = str(department).strip().upper()
-            num_sections = 2 if (dept_upper in ["CSE", "ECE", "DSAI"] and int(semester) in [2, 4, 6]) else 1
+            num_sections = 2 if (dept_upper == "CSE" and int(semester) in [2, 4, 6]) else 1
+
 
             courses = df[(df['Department'] == department) & (df['Semester'] == semester)]
             if 'Schedule' in courses.columns:
@@ -373,7 +423,6 @@ def generate_all_timetables():
                 # Recombine — electives first, then core
                 courses_combined = pd.concat([elective_courses, core_courses])
 
-
                 for _, course in courses_combined.iterrows():
                     code = str(course.get('Course Code', '')).strip()
                     name = str(course.get('Course Name', '')).strip()
@@ -418,22 +467,22 @@ def generate_all_timetables():
                     for _ in range(lec_count):
                         ok = schedule_component(LECTURE_MIN, 'LEC', attempts_limit=800)
                         if not ok:
-                            unscheduled_components.append(UnscheduledComponent(department, semester, code, name, faculty, 'LEC', 1, section, "Lecture not scheduled"))
+                            add_unscheduled_course(unscheduled_components, department, semester, code, name, faculty, 'LEC', section, "Number of collisions exceeded limit")
 
                     for _ in range(tut_count):
                         ok = schedule_component(TUTORIAL_MIN, 'TUT', attempts_limit=600)
                         if not ok:
-                            unscheduled_components.append(UnscheduledComponent(department, semester, code, name, faculty, 'TUT', 1, section, "Tutorial not scheduled"))
+                            add_unscheduled_course(unscheduled_components, department, semester, code, name, faculty, 'TUT', section, "No slot available")
 
                     for _ in range(lab_count):
                         ok = schedule_component(LAB_MIN, 'LAB', attempts_limit=800)
                         if not ok:
-                            unscheduled_components.append(UnscheduledComponent(department, semester, code, name, faculty, 'LAB', 1, section, "Lab not scheduled"))
+                            add_unscheduled_course(unscheduled_components, department, semester, code, name, faculty, 'LAB', section, "Lab not scheduled (slot unavailable)")
 
                     for _ in range(ss_count):
                         ok = schedule_component(SELF_STUDY_MIN, 'SS', attempts_limit=400)
                         if not ok:
-                            unscheduled_components.append(UnscheduledComponent(department, semester, code, name, faculty, 'SS', 1, section, "Self-study not scheduled"))
+                            add_unscheduled_course(unscheduled_components, department, semester, code, name, faculty, 'SS', section, "Self-study not scheduled")
 
                 # Write sheet
                 header = ['Day'] + [f"{slot[0].strftime('%H:%M')}-{slot[1].strftime('%H:%M')}" for slot in TIME_SLOTS]
@@ -491,7 +540,7 @@ def generate_all_timetables():
                             while j < len(TIME_SLOTS) and timetable[day_idx][j]['type'] is not None and timetable[day_idx][j]['code'] == '':
                                 span.append(j)
                                 j += 1
-                            display = f"{code} {typ}\nroom no. :{cls}\n{fac}"
+                            display = f"{typ}\nroom no. :{cls}\n{fac}"
 
                             if code in section_subject_color:
                                 subj_color = section_subject_color[code]
@@ -518,203 +567,639 @@ def generate_all_timetables():
                             except Exception:
                                 pass
 
-                for col_idx in range(1, len(TIME_SLOTS) + 2):
-                    ws.column_dimensions[get_column_letter(col_idx)].width = 15
-                for r in range(2, 2 + len(DAYS)):
+                for col_idx in range(1, len(TIME_SLOTS)+2):
                     try:
-                        ws.row_dimensions[r].height = 40
+                        ws.column_dimensions[get_column_letter(col_idx)].width = 15
                     except Exception:
                         pass
 
-                # ---------- LEGEND TABLE ----------
-                legend_start = len(DAYS) + 4
-                ws.cell(row=legend_start, column=1, value="Legend").font = Font(bold=True, size=12)
-                legend_start += 1
+                for row in ws.iter_rows(min_row=2, max_row=len(DAYS)+1):
+                    ws.row_dimensions[row[0].row].height = 40
 
-                # Add a fifth column for actual room numbers
-                headers = ["Code", "Color", "Course Name", "Faculty", "Room Numbers"]
-                for i, header in enumerate(headers, start=1):
-                    cell = ws.cell(row=legend_start, column=i, value=header)
+                # Add Self-Study Only Courses section
+                current_row = len(DAYS) + 4  # Initialize current_row here, before any sections
+
+                # Build a list of self-study-only courses for this dept/sem
+                ss_courses_for_this_section = []
+                for _, course in courses_combined.iterrows():
+                    l = int(course['L']) if pd.notna(course['L']) else 0
+                    t = int(course['T']) if pd.notna(course['T']) else 0
+                    p = int(course['P']) if pd.notna(course['P']) else 0
+                    s = int(course['S']) if pd.notna(course['S']) else 0
+                    if s > 0 and l == 0 and t == 0 and p == 0:
+                        ss_courses_for_this_section.append({
+                            'code': str(course['Course Code']),
+                            'name': str(course['Course Name']),
+                            'faculty': str(course['Faculty'])
+                        })
+
+                if ss_courses_for_this_section:
+                    ws.cell(row=current_row, column=1, value="Self-Study Only Courses")
+                    ws.cell(row=current_row, column=1).font = Font(bold=True)
+                    current_row += 1
+
+                    headers = ['Course Code', 'Course Name', 'Faculty']
+                    for col, header in enumerate(headers, 1):
+                        ws.cell(row=current_row, column=col, value=header)
+                        ws.cell(row=current_row, column=col).font = Font(bold=True)
+                    current_row += 1
+
+                    for course in ss_courses_for_this_section:
+                        ws.cell(row=current_row, column=1, value=course['code'])
+                        ws.cell(row=current_row, column=2, value=course['name'])
+                        ws.cell(row=current_row, column=3, value=course['faculty'])
+                        current_row += 1
+
+                    current_row += 2  # Add extra spacing after self-study courses
+
+                
+
+                # Improved legend formatting
+                legend_title = ws.cell(row=current_row, column=1, value="Legend")
+                legend_title.font = Font(bold=True, size=12)
+                current_row += 2
+
+                # Wider columns for legend
+                ws.column_dimensions['A'].width = 20  # Subject Code
+                ws.column_dimensions['B'].width = 10  # Color (moved next to code)
+                ws.column_dimensions['C'].width = 40  # Subject Name
+                ws.column_dimensions['D'].width = 30  # Faculty
+                ws.column_dimensions['E'].width = 15  # LTPS
+                ws.column_dimensions['F'].width = 15  # Room
+
+                # Add legend headers with better formatting
+                # Add legend headers with better formatting (added Room column)
+                legend_headers = ['Subject Code', 'Color', 'Subject Name', 'Faculty', 'LTPS', 'Room']
+                for col, header in enumerate(legend_headers, 1):
+                    cell = ws.cell(row=current_row, column=col, value=header)
                     cell.font = Font(bold=True)
-                    cell.fill = PatternFill(start_color="FFD700", end_color="FFD700", fill_type="solid")
-                    cell.alignment = Alignment(horizontal='center', vertical='center')
-                legend_start += 1
+                    cell.border = border
+                    cell.fill = PatternFill(start_color="F0F0F0", end_color="F0F0F0", fill_type="solid")
+                    cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+                current_row += 1
 
-                border_style = Border(left=Side(style='thin'), right=Side(style='thin'),
-                                    top=Side(style='thin'), bottom=Side(style='thin'))
-
-                # Build legend rows
+                # Add subject entries with improved spacing and color next to code
                 for code, color in section_subject_color.items():
-                    rn = courses_combined[courses_combined['Course Code'] == code]
-                    name_val = str(rn['Course Name'].iloc[0]) if not rn.empty else ''
-                    fac_val = str(rn['Faculty'].iloc[0]) if not rn.empty else ''
+    # Skip courses that have no assigned room
+                    assigned_room = course_room_mapping.get(code, "—")
+                    if not assigned_room or assigned_room == "—":
+                        continue  # ❌ Skip this entry
 
-                    # Collect all unique rooms used for this course in this section
-                    used_rooms = set()
-                    for day_idx in range(len(DAYS)):
-                        for slot_idx in range(len(TIME_SLOTS)):
-                            if timetable[day_idx][slot_idx]['code'] == code or timetable[day_idx][slot_idx]['name'] == name_val:
-                                room_val = timetable[day_idx][slot_idx]['classroom']
-                                if room_val:
-                                    used_rooms.add(str(room_val))
-                    rooms_str = ", ".join(sorted(list(used_rooms))) if used_rooms else "-"
+                    ws.row_dimensions[current_row].height = 30
 
-                    ws.cell(row=legend_start, column=1, value=code)
-                    color_cell = ws.cell(row=legend_start, column=2, value="")
-                    color_cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
-                    ws.cell(row=legend_start, column=3, value=name_val)
-                    ws.cell(row=legend_start, column=4, value=fac_val)
-                    ws.cell(row=legend_start, column=5, value=rooms_str)
+                    # Get LTPS values for this course
+                    ltps_value = ""
+                    for _, course_row in courses_combined.iterrows():
+                        if str(course_row['Course Code']) == code:
+                            l = str(int(course_row['L'])) if pd.notna(course_row['L']) else "0"
+                            t = str(int(course_row['T'])) if pd.notna(course_row['T']) else "0"
+                            p = str(int(course_row['P'])) if pd.notna(course_row['P']) else "0"
+                            s = str(int(course_row['S'])) if pd.notna(course_row['S']) and 'S' in course_row else "0"
+                            ltps_value = f"{l}-{t}-{p}-{s}"
+                            break
 
-                    for col in range(1, 6):
-                        c = ws.cell(row=legend_start, column=col)
-                        c.border = border_style
-                        c.alignment = Alignment(vertical='center', horizontal='center', wrap_text=True)
+                    course_name = ''
+                    fac_name = ''
+                    if code in course_faculty_map:
+                        fac_name = course_faculty_map[code]
+                        # find name from courses_combined
+                        for _, cr in courses_combined.iterrows():
+                            if str(cr['Course Code']) == code:
+                                course_name = str(cr['Course Name'])
+                                break
 
-                    ws.row_dimensions[legend_start].height = 25
-                    legend_start += 1
+                    cells = [
+                        (code, None),
+                        ('', PatternFill(start_color=color, end_color=color, fill_type="solid")),
+                        (course_name, None),
+                        (fac_name, None),
+                        (ltps_value, None),
+                        (assigned_room, None)
+                    ]
 
-                # Adjust column widths
-                ws.column_dimensions[get_column_letter(1)].width = 12  # Code
-                ws.column_dimensions[get_column_letter(2)].width = 10  # Color box
-                ws.column_dimensions[get_column_letter(3)].width = 45  # Course Name
-                ws.column_dimensions[get_column_letter(4)].width = 40  # Faculty
-                ws.column_dimensions[get_column_letter(5)].width = 25  # Room Numbers
+                    for col, (value, fill) in enumerate(cells, 1):
+                        cell = ws.cell(row=current_row, column=col, value=value)
+                        cell.border = border
+                        if fill:
+                            cell.fill = fill
+                        cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True, indent=2)
+
+                    current_row += 1
 
 
+    # Format the overview sheet
     for col in range(1, 4):
-        overview.column_dimensions[get_column_letter(col)].width = 22
-    for cell in overview[4]:
-        try:
-            cell.fill = PatternFill(start_color="FFD700", end_color="FFD700", fill_type="solid")
-            cell.font = Font(bold=True)
-            cell.alignment = Alignment(horizontal='center', vertical='center')
-        except Exception:
-            pass
+        overview.column_dimensions[get_column_letter(col)].width = 20
 
-    out_name = "timetable_all_departments.xlsx"
-    wb.save(out_name)
-    print(f"Combined timetable saved as {out_name}")
-def generate_exam_timetable():
-    print("\n🧾 Generating formatted exam timetable (exam_timetable.xlsx)...")
+    for row_ in overview.iter_rows(min_row=1, max_row=4):
+        for cell in row_:
+            cell.font = Font(bold=True)
+
+    # Apply formatting to the overview table headers
+    for cell in overview[4]:
+        cell.fill = PatternFill(start_color="FFD700", end_color="FFD700", fill_type="solid")
+        cell.font = Font(bold=True)
+        cell.border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                           top=Side(style='thin'), bottom=Side(style='thin'))
+
+    # Apply borders to the overview data
+    for row_ in overview.iter_rows(min_row=5, max_row=row_index-1):
+        for cell in row_:
+            cell.border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                               top=Side(style='thin'), bottom=Side(style='thin'))
+
+    # Save the workbook
+    out_filename = os.path.join(OUTPUT_DIR, "timetable_all_departments.xlsx")
+    try:
+        wb.save(out_filename)
+        print(f"Combined timetable for all departments and semesters saved as {out_filename}")
+    except Exception as e:
+        print(f"Failed to save combined timetable: {e}")
+        traceback.print_exc()
+
+    # After saving combined workbook, create teacher and unscheduled Excels
+    try:
+        create_teacher_and_unscheduled_from_combined(out_filename, unscheduled_components)
+    except Exception as e:
+        print("Failed to generate teacher/unscheduled workbooks:", e)
+        traceback.print_exc()
+
+    return out_filename
+
+# ---------------------------
+# Teacher + Unscheduled helper
+# ---------------------------
+def split_faculty_names(fac_str):
+    """Split faculty string into separate names using common separators."""
+    if fac_str is None:
+        return []
+    s = str(fac_str).strip()
+    if s == '' or s.lower() in ['nan', 'none']:
+        return []
+    # treat common separators
+    parts = [s]
+    for sep in ['/', ',', '&', ';']:
+        if sep in s:
+            parts = [p.strip() for p in s.split(sep) if p.strip()]
+            break
+    return parts if parts else [s]
+
+def parse_cell_for_course(cell_value):
+    """
+    Expected formats in timetable cells (examples):
+      "CS101 LEC\nroom no. :A101\nDr. Name"
+      "B1 Courses\nCS101, CS102\nCS101: Dr. X (A101)\nCS102: Dr. Y (A102)"
+    This function tries to extract:
+      code (first token), type (LEC/TUT/LAB/SS), room (if 'room no.' present), faculty (last line)
+    Returns tuple (code, typ, room, faculty) — many may be '' if not found.
+    """
+    if cell_value is None:
+        return ('', '', '', '')
+    text = str(cell_value).strip()
+    if text == '':
+        return ('', '', '', '')
+
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    faculty = ''
+    room = ''
+    code = ''
+    typ = ''
+
+    # detect 'room no.' pattern anywhere
+    for ln in lines:
+        if 'room no' in ln.lower():
+            # attempt to extract room after colon or :
+            parts = ln.split(':')
+            if len(parts) >= 2:
+                room = parts[-1].strip()
+            else:
+                room = ln.strip()
+
+    # last line probably faculty if it doesn't include 'room' or 'Courses' keywords
+    if len(lines) >= 1:
+        last = lines[-1]
+        if 'room no' not in last.lower() and 'courses' not in last.lower() and ':' not in last:
+            faculty = last
+
+    # Try extracting code and type from the first line if it looks like "CODE TYPE"
+    first = lines[0] if lines else ''
+    if first:
+        tokens = first.split()
+        if len(tokens) >= 2 and tokens[1].upper() in ['LEC', 'LAB', 'TUT', 'SS']:
+            code = tokens[0].strip()
+            typ = tokens[1].strip().upper()
+        else:
+            # fallback: take first token as code
+            code = tokens[0].strip() if tokens else ''
+            # try to detect type anywhere
+            for t in ['LEC', 'LAB', 'TUT', 'SS']:
+                if t in text.upper():
+                    typ = t
+                    break
+
+    # If faculty still empty try to find a token pattern in other lines
+    if not faculty and len(lines) >= 2:
+        for cand in lines[1:]:
+            if any(ch.isalpha() for ch in cand) and 'room no' not in cand.lower() and 'courses' not in cand.lower() and ':' not in cand:
+                faculty = cand
+                break
+
+    return (code, typ, room, faculty)
+
+def create_teacher_and_unscheduled_from_combined(timetable_filename, unscheduled_components):
+    """
+    Builds teacher_timetables.xlsx with clean, formatted sheets per teacher.
+    Also writes unscheduled_courses.xlsx.
+    """
+    try:
+        wb = load_workbook(timetable_filename, data_only=True)
+    except Exception as e:
+        print(f"Failed to open {timetable_filename}: {e}")
+        return
+
+    teacher_slots = {}
+    slot_headers = []
+
+    for sheetname in wb.sheetnames:
+        if sheetname.lower() == 'overview':
+            continue
+        ws = wb[sheetname]
+        header = [str(ws.cell(1, c).value).strip() if ws.cell(1, c).value else '' for c in range(2, ws.max_column + 1)]
+        if len(header) > len(slot_headers):
+            slot_headers = header
+        for r in range(2, ws.max_row + 1):
+            day = ws.cell(r, 1).value
+            if not day or str(day) not in DAYS:
+                break
+            day_idx = DAYS.index(day)
+            for c in range(2, ws.max_column + 1):
+                code, typ, room, faculty = parse_cell_for_course(ws.cell(r, c).value)
+                for f in split_faculty_names(faculty):
+                    if not f:
+                        continue
+                    # Skip any fake or unwanted teacher names
+                    if str(f).strip().upper() in ["BREAK", "MINOR SLOT", "NAN", "NONE", ""]:
+                        continue
+
+                    teacher_slots.setdefault(f, {d: {i: '' for i in range(len(slot_headers))} for d in range(len(DAYS))})
+                    teacher_slots[f][day_idx][c - 2] = f"{code} {typ}\n({sheetname})\nRoom: {room}" if code else ''
+
+    # --- Create formatted teacher workbook ---
+    twb = Workbook()
+    if "Sheet" in twb.sheetnames:
+        twb.remove(twb["Sheet"])
+
+    # Define styles
+    header_fill = PatternFill(start_color="FFD700", end_color="FFD700", fill_type="solid")
+    alt_fill = PatternFill(start_color="FFF8DC", end_color="FFF8DC", fill_type="solid")
+    border = Border(left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin"))
+    header_font = Font(bold=True, size=12)
+    title_font = Font(bold=True, size=14)
+    cell_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    for teacher in sorted(teacher_slots.keys()):
+        safe_name = teacher[:31] or "Unknown"
+        ws = twb.create_sheet(title=safe_name)
+
+        # Add title row
+        ws.merge_cells("A1:{}1".format(get_column_letter(len(slot_headers) + 1)))
+        title_cell = ws.cell(row=1, column=1, value=f"{teacher} — Weekly Timetable")
+        title_cell.font = title_font
+        title_cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        # Header row
+        ws.append(["Day"] + slot_headers)
+        for cell in ws[2]:
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            cell.border = border
+
+        # Fill timetable rows
+        for d, day in enumerate(DAYS):
+            row = [day] + [teacher_slots[teacher][d][i] for i in range(len(slot_headers))]
+            ws.append(row)
+            row_idx = ws.max_row
+            # alternating day color
+            if d % 2 == 0:
+                for cell in ws[row_idx]:
+                    cell.fill = alt_fill
+            for cell in ws[row_idx]:
+                cell.alignment = cell_align
+                cell.border = border
+            ws.row_dimensions[row_idx].height = 35
+
+        # Adjust column widths
+        ws.column_dimensions["A"].width = 15
+        for col in range(2, len(slot_headers) + 2):
+            ws.column_dimensions[get_column_letter(col)].width = 20
+
+    twb.save(os.path.join(OUTPUT_DIR, "teacher_timetables.xlsx"))
+    print("✅ Saved formatted teacher_timetables.xlsx")
+
+    # --- Unscheduled Courses workbook (unchanged) ---
+    # --- Improved Unscheduled Courses Workbook (Unique + Reason) ---
+    # --- Improved Unscheduled Courses Workbook (Unique + Dynamic Reason) ---
+    uwb = Workbook()
+    ws = uwb.active
+    ws.title = "Unscheduled Courses"
+
+    headers = ["Course Code", "Department", "Semester", "Reason"]
+    ws.append(headers)
+
+    # Dictionary to avoid duplicates
+    unscheduled_unique = {}
+
+    for u in unscheduled_components:
+        if u.code not in unscheduled_unique:
+            # --- Detect Reason ---
+            if hasattr(u, "reason") and u.reason and len(str(u.reason).strip()) > 0:
+                reason_text = str(u.reason).strip()
+            else:
+                # Intelligent guess based on context
+                if "collision" in str(u.component_type).lower():
+                    reason_text = "Number of collisions exceeded limit"
+                elif "slot" in str(u.component_type).lower() or "no slot" in str(u.reason).lower():
+                    reason_text = "No slot available"
+                elif "faculty" in str(u.reason).lower():
+                    reason_text = "Faculty unavailable"
+                else:
+                    reason_text = "Unspecified scheduling issue"
+
+            # Store one entry per course
+            unscheduled_unique[u.code] = {
+                "Course Code": u.code,
+                "Department": u.department,
+                "Semester": u.semester,
+                "Reason": reason_text
+            }
+
+    # Write data
+    for entry in unscheduled_unique.values():
+        ws.append([entry[h] for h in headers])
+
+    uwb.save(os.path.join(OUTPUT_DIR, "unscheduled_courses.xlsx"))
+    print(f"✅ Saved unscheduled_courses.xlsx with {len(unscheduled_unique)} unique courses and detailed reasons")
+
+
+def allocate_exam_rooms(course_code, students, date_str, df_rooms, date_room_usage):
+    """
+    Allocate rooms for an exam based on number of students and room capacities.
+    Ensures:
+    - No room clashes on same day
+    - Uses smallest number of rooms to fit all students
+    - Chooses rooms with minimal extra capacity
+    """
+    assigned_rooms = []
+    total_cap = 0
+
+    # Filter available rooms (not used on this date)
+    available = df_rooms[~df_rooms["roomNumt"].isin(date_room_usage[date_str])].copy()
+    available = available.sort_values(by="capacity", ascending=True)
+
+    # Step 1: try to find smallest single room that fits all students
+    suitable = available[available["capacity"] >= students]
+    if not suitable.empty:
+        best = suitable.iloc[0]  # smallest room that fits
+        assigned_rooms = [best["roomNumt"]]
+        total_cap = best["capacity"]
+        date_room_usage[date_str].add(best["roomNumt"])
+    else:
+        # Step 2: combine multiple smaller rooms until enough capacity
+        remaining = students
+        for _, r in available.iterrows():
+            assigned_rooms.append(r["roomNumt"])
+            total_cap += r["capacity"]
+            date_room_usage[date_str].add(r["roomNumt"])
+            remaining -= r["capacity"]
+            if remaining <= 0:
+                break
+        if remaining > 0:
+            print(f"⚠️ Not enough total room capacity for {course_code} ({students} students). Assigned all available rooms.")
+
+    return assigned_rooms
+
+# ---------------------------
+# Exam generator and invigilation sheet
+# ---------------------------
+def exam_generator():
+    global INPUT_DIR
+    """
+    Generates an exam timetable with:
+    - Room assignment strictly by capacity (closest fit)
+    - No room clashes for the same day
+    - Automatic split for large courses
+    - Smart room reuse across days
+    - Invigilation schedule with course + room + faculty
+    """
+    exam_file = "Exam_timetable.xlsx"
 
     try:
-        df = pd.read_csv("combined_faculty_fullnames_doctorized.csv")
-    except FileNotFoundError:
-        df = pd.read_csv("combined.csv")
+        df_courses = pd.read_csv(os.path.join(INPUT_DIR, "combined.csv"))
+        df_rooms = pd.read_csv(os.path.join(INPUT_DIR, "rooms.csv"))
+    except FileNotFoundError as e:
+        print(f"❌ Missing file: {e}")
+        return None
 
-    df = df[df["Schedule"].fillna("Yes").str.upper() == "YES"]
+    # --- Clean and validate ---
+    df_courses = df_courses.dropna(subset=["Course Code", "Course Name", "Faculty", "Department", "Semester"])
+    if "total_students" not in df_courses.columns:
+        df_courses["total_students"] = 50
+    df_courses["total_students"] = df_courses["total_students"].fillna(50).astype(int)
 
-    # Create workbook and sheets
+    # Normalize rooms.csv headers
+    df_rooms.columns = [c.strip().lower() for c in df_rooms.columns]
+
+    def find_col(keywords):
+        for c in df_rooms.columns:
+            if any(k in c for k in keywords):
+                return c
+        return None
+
+    room_col = find_col(["room", "num", "id"])
+    cap_col = find_col(["cap", "seat"])
+    type_col = find_col(["type"])
+
+    if not room_col or not cap_col:
+        print("❌ rooms.csv must have columns for room number and capacity.")
+        print("Detected columns:", df_rooms.columns)
+        return None
+
+    df_rooms = df_rooms.rename(columns={room_col: "room", cap_col: "capacity"})
+    if type_col:
+        df_rooms = df_rooms.rename(columns={type_col: "type"})
+    else:
+        df_rooms["type"] = "LECTURE_ROOM"
+
+    df_rooms["room"] = df_rooms["room"].astype(str).str.strip()
+    df_rooms["capacity"] = pd.to_numeric(df_rooms["capacity"], errors="coerce").fillna(0).astype(int)
+    df_rooms = df_rooms[df_rooms["capacity"] > 0].sort_values(by="capacity").reset_index(drop=True)
+
+    print(f"✅ Loaded {len(df_rooms)} rooms for exam scheduling")
+
+    # --- Faculty list ---
+    faculty_list = list(set(sum([str(f).replace(" and ", "/").replace(",", "/").split("/") for f in df_courses["Faculty"]], [])))
+    faculty_list = [f.strip() for f in faculty_list if f.strip()]
+
+    # --- Dates setup ---
+    session_title = "AN: 03:00 PM to 04:30 PM"
+    start_date = datetime(2025, 11, 20)
+    num_days = min(10, len(df_courses))
+    dates = [start_date + timedelta(days=i) for i in range(num_days)]
+    days = [d.strftime("%A") for d in dates]
+
+    shuffled = df_courses.sample(frac=1, random_state=42).reset_index(drop=True)
+    course_date_map = {row["Course Code"]: dates[i % len(dates)] for i, row in shuffled.iterrows()}
+
+    # --- Track rooms used per date ---
+    date_room_usage = {d.strftime("%d-%b-%Y"): set() for d in dates}
+    invigilation_entries = []
+
+    for date in dates:
+        date_str = date.strftime("%d-%b-%Y")
+        today_courses = shuffled[shuffled["Course Code"].isin(
+            [c for c, dt in course_date_map.items() if dt == date]
+        )]
+
+        for _, course in today_courses.iterrows():
+            code = course["Course Code"]
+            name = course["Course Name"]
+            dept = course["Department"]
+            sem = course["Semester"]
+            teacher = str(course["Faculty"]).strip()
+            students = int(course["total_students"])
+            time_slot = "03:00 PM–04:30 PM"
+
+            assigned_rooms = []
+            remaining = students
+
+            # --- Select rooms based on capacity ---
+            available = df_rooms[~df_rooms["room"].isin(date_room_usage[date_str])].copy()
+            available = available.sort_values(by="capacity", ascending=True)
+
+            # Try exact fit
+            suitable = available[available["capacity"] >= remaining]
+            if not suitable.empty:
+                best = suitable.iloc[0]
+                assigned_rooms = [best["room"]]
+                date_room_usage[date_str].add(best["room"])
+            else:
+                # Use multiple smaller rooms
+                total_cap = 0
+                for _, room_row in available.iterrows():
+                    assigned_rooms.append(room_row["room"])
+                    total_cap += room_row["capacity"]
+                    date_room_usage[date_str].add(room_row["room"])
+                    if total_cap >= remaining:
+                        break
+                if total_cap < remaining:
+                    print(f"⚠️ Not enough total capacity for {code} ({students} students). Assigned all available rooms.")
+
+            # --- Assign invigilators ---
+            available_teachers = [f for f in faculty_list if f.lower() not in teacher.lower()]
+            for room in assigned_rooms:
+                invigilator = random.choice(available_teachers) if available_teachers else "TBD"
+                invigilation_entries.append({
+                    "Faculty": invigilator,
+                    "Date": date_str,
+                    "Time": time_slot,
+                    "Course Code": code,
+                    "Course Name": name,
+                    "Department": dept,
+                    "Semester": sem,
+                    "Room": room,
+                    "Strength": students
+                })
+
+    # --- Excel output ---
     wb = Workbook()
     ws = wb.active
     ws.title = "Exam Timetable"
-    legend = wb.create_sheet("Legend")
 
-    # ===== HEADER =====
-    ws.merge_cells("A1:K1")
-    ws["A1"] = "Indian Institute of Information Technology Dharwad"
-    ws["A1"].font = Font(size=14, bold=True)
-    ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+    bold_center = Font(bold=True)
+    center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    header_fill = PatternFill(start_color="BFBFBF", end_color="BFBFBF", fill_type="solid")
+    border = Border(left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin"))
 
-    ws.merge_cells("A2:K2")
-    ws["A2"] = "Time table for All Departments - End Semester Exam (Nov 2025)"
-    ws["A2"].font = Font(size=12, bold=True)
-    ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(dates)+1)
+    title = ws.cell(row=1, column=1, value=session_title)
+    title.font = Font(bold=True, size=14)
+    title.alignment = center
+    title.fill = header_fill
+    title.border = border
 
-    ws.merge_cells("A3:K3")
-    ws["A3"] = "AN: 03:00 PM to 04:30 PM"
-    ws["A3"].font = Font(size=11, bold=True)
-    ws["A3"].alignment = Alignment(horizontal="center", vertical="center")
+    ws.cell(row=2, column=1, value="Date").font = bold_center
+    for i, d in enumerate(dates):
+        c = ws.cell(row=2, column=i+2, value=d.strftime("%d-%b-%Y"))
+        c.font = bold_center
+        c.alignment = center
+        c.fill = header_fill
+        c.border = border
 
-    # ===== DATE RANGE =====
-    start_date = date(2025, 11, 20)
-    num_days = 10
-    exam_dates = []
-    d = start_date
-    while len(exam_dates) < num_days:
-        if d.weekday() != 6:  # Skip Sundays
-            exam_dates.append(d)
-        d += timedelta(days=1)
+    ws.cell(row=3, column=1, value="Days").font = bold_center
+    for i, day in enumerate(days):
+        c = ws.cell(row=3, column=i+2, value=day)
+        c.font = bold_center
+        c.alignment = center
+        c.fill = header_fill
+        c.border = border
 
-    # ===== TABLE HEADERS =====
-    ws["A5"] = "Department - Sem"
-    ws["A5"].font = Font(bold=True)
-    ws["A5"].alignment = Alignment(horizontal="center", vertical="center")
-    ws.column_dimensions["A"].width = 25
+    grouped_by_date = {}
+    for e in invigilation_entries:
+        grouped_by_date.setdefault(e["Date"], set()).add(e["Course Code"])
+    max_rows = max(len(v) for v in grouped_by_date.values())
 
-    for i, dt in enumerate(exam_dates):
-        col = get_column_letter(i + 2)
-        ws[f"{col}5"] = dt.strftime("%d-%b-%Y")
-        ws[f"{col}5"].font = Font(bold=True)
-        ws[f"{col}5"].alignment = Alignment(horizontal="center", vertical="center")
-        ws[f"{col}6"] = dt.strftime("%A")
-        ws[f"{col}6"].font = Font(italic=True)
-        ws[f"{col}6"].alignment = Alignment(horizontal="center", vertical="center")
-        ws.column_dimensions[col].width = 22
-
-    # ===== GROUP COURSES BY CLASS =====
-    df["Class"] = df["Department"].astype(str) + "_Sem" + df["Semester"].astype(str)
-    class_groups = df.groupby("Class")
-
-    # ===== LEGEND SHEET =====
-    legend.append(["Course Code", "Course Name", "Faculty Name"])
-    legend["A1"].font = legend["B1"].font = legend["C1"].font = Font(bold=True)
-    legend.column_dimensions["A"].width = 20   # Course Code
-    legend.column_dimensions["B"].width = 45   # Course Name
-    legend.column_dimensions["C"].width = 30   # Faculty Name
-
-    unique_courses = (
-        df[["Course Code", "Course Name", "Faculty"]]
-            .drop_duplicates()
-            .sort_values("Course Code")
-            .reset_index(drop=True)
-    )
-    for _, row in unique_courses.iterrows():
-        legend.append([row["Course Code"], row["Course Name"], row["Faculty"]])
-
-
-    # ===== SCHEDULING =====
-    row = 7
-    for class_name, group in class_groups:
-        ws[f"A{row}"] = class_name
-        ws[f"A{row}"].font = Font(bold=True, color="0000FF")
-        ws[f"A{row}"].alignment = Alignment(horizontal="center", vertical="center")
-
-        courses = group[["Course Code", "Faculty"]].drop_duplicates().values.tolist()
-        random.shuffle(courses)
-
-        for i, (course, _) in enumerate(courses):
-            date_index = i % len(exam_dates)
-            col = get_column_letter(2 + date_index)
-            ws[f"{col}{row}"] = course  # ✅ Only course code
-            ws[f"{col}{row}"].alignment = Alignment(
-                horizontal="center", vertical="center", wrap_text=True
-            )
-
-        row += 1
-
-    # ===== STYLING =====
-    thin = Side(style="thin")
-    border = Border(left=thin, right=thin, top=thin, bottom=thin)
-    for r in ws.iter_rows(min_row=5, max_row=row, min_col=1, max_col=len(exam_dates) + 1):
-        for cell in r:
+    for r in range(max_rows):
+        for i, d in enumerate(dates):
+            code_list = list(grouped_by_date.get(d.strftime("%d-%b-%Y"), []))
+            val = code_list[r] if r < len(code_list) else ""
+            cell = ws.cell(row=r+4, column=i+2, value=val)
+            cell.alignment = center
             cell.border = border
-            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    # ===== SAVE =====
-    wb.save("exam_timetable.xlsx")
-    print("✅ Exam timetable saved as exam_timetable.xlsx (with Legend sheet)")
+    ws.column_dimensions["A"].width = 15
+    for col in range(2, len(dates)+2):
+        ws.column_dimensions[get_column_letter(col)].width = 16
+
+    # Invigilation schedule
+    ws2 = wb.create_sheet("Exam Invigilation Schedule")
+    headers = ["Faculty", "Date", "Time", "Course Code", "Course Name", "Department", "Semester", "Room", "Strength"]
+    ws2.append(headers)
+
+    for i, h in enumerate(headers, 1):
+        cell = ws2.cell(row=1, column=i, value=h)
+        cell.font = bold_center
+        cell.alignment = center
+        cell.fill = header_fill
+        cell.border = border
+
+    for entry in invigilation_entries:
+        ws2.append([entry[h] for h in headers])
+
+    for col in range(1, len(headers)+1):
+        ws2.column_dimensions[get_column_letter(col)].width = 22
+    for r in range(2, ws2.max_row+1):
+        for c in ws2[r]:
+            c.alignment = center
+            c.border = border
+
+    exam_file = os.path.join(OUTPUT_DIR, "Exam_timetable.xlsx")
+    wb.save(exam_file)
+    print(f"✅ Exam timetable and invigilation schedule saved → {exam_file}")
+    return exam_file
+
 
 # ---------------------------
-# Run
+# Run main if executed
 # ---------------------------
 if __name__ == "__main__":
-    print("\n🚀 Generating all timetables...")
     try:
-        generate_all_timetables()     # Class timetable
-        generate_exam_timetable()     # Exam timetable
-        print("\n✅ All timetables generated successfully!")
-    except Exception:
-        print("\n❌ Error while generating timetables:")
+        # Generate all class and teacher timetables
+        generate_all_timetables()
+
+        # Generate exam timetable (includes invigilation schedule automatically)
+        exam_generator()
+
+    except Exception as e:
+        print("Error running TT_gen:", e)
         traceback.print_exc()
