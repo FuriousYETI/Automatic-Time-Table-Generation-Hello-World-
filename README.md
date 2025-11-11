@@ -13,7 +13,7 @@ This manual provides instructions for downloading, setting up, and using the sys
 #### Accessing the Repository
 
 - Visit the GitHub repository: 'https://github.com/FuriousYETI/Automatic-Time-Table-Generation-Hello-World-.git'
-- If the repository is private, request access from the Software Psych team.
+
 
 #### Downloading as ZIP
 
