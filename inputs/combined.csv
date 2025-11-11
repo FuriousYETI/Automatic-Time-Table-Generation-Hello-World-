@@ -1,10 +1,9 @@
-
 Department,Semester,Course Code,Course Name,L,T,P,S,C,Faculty,Schedule,total_students
 CSE,2,CS162,Optimization,3,1,0,0,2,Dr. Dibyajyothi Guha,Yes,70
 CSE,2,CS163,Data Structures & Algorithms,3,0,2,0,4,Dr. Suvadip Hazra,Yes,70
 CSE,2,CS164,Computer Architecture,3,0,2,0,2,Dr. Prabhu Prasad,Yes,70
 CSE,2,CS165,Mathematical foundations of Computing,3,0,0,0,3,Dr. Animesh Roy,Yes,70
-CSE,2,HS153,Innovation and Entrepreneurship ,2,1,0,2,3,Dr. Deepak K T,Yes,70
+CSE,2,HS153,Innovation and Entrepreneurship ,2,1,0,0,3,Dr. Deepak K T,Yes,70
 CSE,4,MA202,Linear Algebra,3,1,0,0,4,Dr. Anand Barangi,Yes,70
 CSE,4,CS206,Theory of Computing,3,1,0,0,4,Dr. Pavan,Yes,70
 CSE,4,CS204,Operating Systems,3,0,2,0,4,Dr. Suvadip Hazra,Yes,70
@@ -14,13 +13,13 @@ CSE,4,HS205,Ethics,3,0,0,0,3,Dr. Jolly Thomas,Yes,70
 CSE,6,CS307,Machine Learning,3,0,2,0,4,Dr. Girish GN/Dr. Krishnendu Ghosh,Yes,70
 CSE,6,DS001,Large Languange Models,3,1,0,0,4,Dr. Sunil S,Yes,27
 CSE,6,DS002,Natural Language Processing,3,1,0,0,4,Dr. Krishnendu Ghosh,Yes,24
-CSE,6,DS003,Deep Speech Processing,3,0,0,4,4,Prof. SRM Prasanna,Yes,18
+CSE,6,DS003,Deep Speech Processing,3,0,0,0,4,Prof. SRM Prasanna,Yes,18
 CSE,6,CS005,Blockchain Technology,3,1,0,0,4,Dr. Rajendra H,Yes,32
 CSE,6,CS006,Introduction to 5G Network,3,1,0,0,4,Dr. Jagadeesha Bhat,Yes,26
-CSE,6,DS007,Model Checking,3,0,0,4,4,Dr. Pavan,Yes,23
+CSE,6,DS007,Model Checking,3,0,0,0,4,Dr. Pavan,Yes,23
 CSE,6,PH008,Quantum Communication,3,0,0,0,3,Dr. Aswath B,Yes,15
 CSE,6,PH009,Quantum HPC and AI,1,0,0,0,1,Dr. Manish M (Dr. Aswath),Yes,17
-CSE,6,EC011,Automotive Embedded and Multimedia Systems,3,0,0,4,4,Dr. Sibasankar Padhy,Yes,22
+CSE,6,EC011,Automotive Embedded and Multimedia Systems,3,0,0,0,4,Dr. Sibasankar Padhy,Yes,22
 CSE,6,EC012,Microwave Engineering,3,1,0,0,4,Dr. Somen Bhattacharjee,Yes,18
 CSE,6,CS462,Computer Graphics,3,1,0,0,4,Dr. Vivekraj V K,Yes,25
 CSE,6,CS469,Virtualization and Cloud Computing,,,,,,Dr Malay Kumar,Yes,21
@@ -36,7 +35,7 @@ CSE,2,DS164,Data Curation Techniques,2,0,2,0,3,Dr. Siddharth R,Yes,70
 CSE,2,CS311,Data Science with Python,0,0,2,0,0,Dr. Abdul Wahid,Yes,27
 CSE,2,CS313,Industry Insights Program Part 1,0,0,1,0,0,Mr. Ram Subramanian & Mr. Sasi Kumar Sundara Rajan,Yes,32
 DSAI,2,CS315,Linux for Engineers,0,0,2,0,0,Dr. Shirshendu Layek,Yes,22
-DSAI,2,CS318,Visual Design: Principles and Application in Product Communication,0,0,0,2,0,Dr. Sandesh P,Yes,19
+DSAI,2,CS318,Visual Design: Principles and Application in Product Communication,0,0,0,0,0,Dr. Sandesh P,Yes,19
 DSAI,2,CS319,Introduction to Internet of Things,0,0,2,0,0,Dr. Jagadeesha Bhat,Yes,26
 DSAI,2,CS320,Computer Intensive Statistical Methods,0,0,2,0,0,Dr. Ramesh Athe,Yes,21
 DSAI,2,DS321,Concurrency and Computation,0,0,2,0,0,Dr Pramod Yelmewad,Yes,18
@@ -45,16 +44,16 @@ DSAI,4,HS206,Industrial Social Psychology,3,0,0,0,3,Dr. Navyashree,Yes,70
 DSAI,4,CS204,Operating Systems,3,1,0,0,4,Dr. Manjunath KV,Yes,70
 DSAI,4,DS204,Software Engineering and Services,3,0,2,0,4,Dr. Animesh Chaturvedi,Yes,70
 DSAI,4,CS310,Database Management System,3,1,2,0,5,Dr. Utkarsh Khaire,Yes,70
-DSAI,6,DS309,Cloud Computing,3,0,0,4,4,Dr. Animesh Chaturvedi,Yes,70
+DSAI,6,DS309,Cloud Computing,3,0,0,0,4,Dr. Animesh Chaturvedi,Yes,70
 DSAI,6,DS307,Innovation & Entrepreneurship,3,1,0,0,4,Mr. Ram Subramanian,Yes,70
 DSAI,6,DS308,Data Security & Privacy,3,1,0,0,4,Dr. Abdul Wahid & Dr. Rajendra Hegadi,Yes,70
 DSAI,6,DS399,Mini Project,0,0,0,8,2,Dr. Shirshendu Layek,Yes,70
 DSAI,6,CS464,Deep Learning for Computer Vision,3,1,0,0,4,Dr. Chinmayananda,Yes,28
-DSAI,6,DS322,Large Language Models,3,0,0,4,4,Dr. Sunil S,Yes,31
+DSAI,6,DS322,Large Language Models,3,0,0,0,4,Dr. Sunil S,Yes,31
 DSAI,6,CS458,Natural Language Processing,3,1,0,0,4,Dr. Krishnendu Ghosh,Yes,25
 DSAI,6,DS323,Deep Speech Processing,3,1,0,0,4,Prof. SRM Prasanna,Yes,19
-DSAI,6,CS455,Blockchain Technology,3,0,0,4,4,Dr. Rajendra H,Yes,24
-DSAI,6,DS324,Model Checking,3,0,0,4,4,Dr. Pavan,Yes,15
+DSAI,6,CS455,Blockchain Technology,3,0,0,0,4,Dr. Rajendra H,Yes,24
+DSAI,6,DS324,Model Checking,3,0,0,0,4,Dr. Pavan,Yes,15
 DSAI,6,DS327,Design Thinking and Innovation,3,1,0,0,4,Dr. Sandesh P,Yes,29
 DSAI,2,MA161,Linear Algebra,3,1,0,0,2,Dr. Somen Bhattacharjee,Yes,70
 DSAI,2,MA162,Optimization,3,1,0,0,2,Dr. Dibyajyothi Guha,Yes,70
@@ -71,12 +70,12 @@ ECE,4,EC205,Control Systems,3,0,2,0,4,Dr. Pankaj Kumar,Yes,70
 ECE,4,EC310,Embedded Systems Design,3,1,0,0,4,Dr. Prakash Pawar,Yes,70
 ECE,4,EC204,Analog and Digital Communication,3,1,2,0,5,Dr. Somen Bhattacharjee,Yes,70
 ECE,4,HS205,Ethics,3,0,0,0,3,Dr. Jolly Thomas,Yes,70
-ECE,6,CS307,Wireless Communication,3,0,0,4,4,Dr. Rajib Sharma/ Dr. Rao (Lab),Yes,70
+ECE,6,CS307,Wireless Communication,3,0,0,0,4,Dr. Rajib Sharma/ Dr. Rao (Lab),Yes,70
 ECE,6,CS464,Deep Learning for Computer Vision ,3,1,0,0,4,Dr. Chinmayanand,Yes,30
-ECE,6,HS239,Large Languange Models,3,0,0,4,4,Dr. Sunil S,Yes,25
+ECE,6,HS239,Large Languange Models,3,0,0,0,4,Dr. Sunil S,Yes,25
 ECE,6,CS458,Natural Language Processing,3,1,0,0,4,Dr. Krishnendu Ghosh,Yes,27
 ECE,6,HS240,Deep Speech Processing,3,1,0,0,4,Prof. SRM Prasanna,Yes,21
-ECE,6,CS455,Blockchain Technology,3,0,0,4,4,Dr. Rajendra H,Yes,26
+ECE,6,CS455,Blockchain Technology,3,0,0,0,4,Dr. Rajendra H,Yes,26
 ECE,6,HS241,Design Thinking and Innovation,3,1,0,0,4,Dr. Sandesh P,Yes,28
 ECE,6,CS307,Machine Learning,3,1,0,0,4,Dr. Deepak K T,Yes,33
 ECE,6,EC399,Mini Project 1,0,0,0,8,2,Dr. Pankaj Kumar,Yes,70
