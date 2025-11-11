@@ -4,7 +4,6 @@ CSE,2,CS162,Optimization,3,1,0,0,2,Dr. Dibyajyothi Guha,Yes,70
 CSE,2,CS163,Data Structures & Algorithms,3,0,2,0,4,Dr. Suvadip Hazra,Yes,70
 CSE,2,CS164,Computer Architecture,3,0,2,0,2,Dr. Prabhu Prasad,Yes,70
 CSE,2,CS165,Mathematical foundations of Computing,3,0,0,0,3,Dr. Animesh Roy,Yes,70
-CSE,2,HS204 ,Economics ,2,1,0,0,3,Dr. Anusree Kini,Yes,70
 CSE,2,HS153,Innovation and Entrepreneurship ,2,1,0,2,3,Dr. Deepak K T,Yes,70
 CSE,4,MA202,Linear Algebra,3,1,0,0,4,Dr. Anand Barangi,Yes,70
 CSE,4,CS206,Theory of Computing,3,1,0,0,4,Dr. Pavan,Yes,70
@@ -71,7 +70,6 @@ ECE,4,MA208,Probability and Random Processes,3,1,0,0,4,Dr. Rajib Sharma/ Rajesh 
 ECE,4,EC205,Control Systems,3,0,2,0,4,Dr. Pankaj Kumar,Yes,70
 ECE,4,EC310,Embedded Systems Design,3,1,0,0,4,Dr. Prakash Pawar,Yes,70
 ECE,4,EC204,Analog and Digital Communication,3,1,2,0,5,Dr. Somen Bhattacharjee,Yes,70
-ECE,4,HS204,Economics,3,1,0,0,4,Dr. Anushree Kini,Yes,70
 ECE,4,HS205,Ethics,3,0,0,0,3,Dr. Jolly Thomas,Yes,70
 ECE,6,CS307,Wireless Communication,3,0,0,4,4,Dr. Rajib Sharma/ Dr. Rao (Lab),Yes,70
 ECE,6,CS464,Deep Learning for Computer Vision ,3,1,0,0,4,Dr. Chinmayanand,Yes,30
@@ -84,15 +82,15 @@ ECE,6,CS307,Machine Learning,3,1,0,0,4,Dr. Deepak K T,Yes,33
 ECE,6,EC399,Mini Project 1,0,0,0,8,2,Dr. Pankaj Kumar,Yes,70
 ECE,8,EC499,Major Project,0,0,0,32,8,Dr. Rajesh Kumar,Yes,70
 ECE,8,DS499,Major Project,0,0,0,32,,Dr. Abdul Wahid,Yes,70
-ECE,2,ELE001,Elective,3,0,0,0,2,xxx,Yes,70
-ECE,6,ELE002,Elective,3,0,0,0,2,xxx,Yes,70
-ECE,4,ELE003,Elective,3,0,0,0,2,xxx,Yes,70
-CSE,2,ELE001,Elective,3,0,0,0,2,xxx,Yes,70
-CSE,6,ELE002,Elective,3,0,0,0,2,xxx,Yes,70
-CSE,4,ELE003,Elective,3,0,0,0,2,xxx,Yes,70
-DSAI,2,ELE001,Elective,3,0,0,0,2,xxx,Yes,70
-DSAI,6,ELE002,Elective,3,0,0,0,2,xxx,Yes,70
-DSAI,4,ELE003,Elective,3,0,0,0,2,xxx,Yes,70
+ECE,2,ELE001,Elective,3,0,0,0,2,NA,Yes,70
+ECE,6,ELE002,Elective,3,0,0,0,2,NA,Yes,70
+ECE,4,ELE003,Elective,3,0,0,0,2,NA,Yes,70
+CSE,2,ELE001,Elective,3,0,0,0,2,NA,Yes,70
+CSE,6,ELE002,Elective,3,0,0,0,2,NA,Yes,70
+CSE,4,ELE003,Elective,3,0,0,0,2,NA,Yes,70
+DSAI,2,ELE001,Elective,3,0,0,0,2,NA,Yes,70
+DSAI,6,ELE002,Elective,3,0,0,0,2,NA,Yes,70
+DSAI,4,ELE003,Elective,3,0,0,0,2,NA,Yes,70
 ECE,2,MA201,Linear Algebra,3,1,0,0,2,Dr. Somen Bhattacharjee,Yes,70
 ECE,2,MA202,Optimization,3,1,0,0,2,Dr. Dibyajyothi Guha,Yes,70
 ECE,2,EC201,Computer Architecture,3,0,2,0,2,Dr. Jagadish D N,Yes,70
