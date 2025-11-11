@@ -12,17 +12,8 @@ This manual provides instructions for downloading, setting up, and using the sys
 
 #### Accessing the Repository
 
-- Visit the GitHub repository: 'https://github.com/MayankBSahu/Automated-Timetable-scheduling-for-IIIT-Dharwad'
+- Visit the GitHub repository: 'https://github.com/FuriousYETI/Automatic-Time-Table-Generation-Hello-World-.git'
 - If the repository is private, request access from the Software Psych team.
-
-#### Cloning the Repository
-
-- Open a terminal (Command Prompt on Windows, Terminal on macOS/Linux) and run: 
-  
-  git clone https://github.com/Darshan7455/Automated-Timetable-.git
-  
-
-- This downloads the project files to a TimeTable folder on your machine.
 
 #### Downloading as ZIP
 
@@ -47,24 +38,7 @@ This manual provides instructions for downloading, setting up, and using the sys
   
   cd timetable-automation
   
-
-2. *Create a Virtual Environment*:
-
-- Create a virtual environment to manage dependencies:
-  
-  python -m venv venv
-  
-- Activate the virtual environment:
-  - On Windows:
-    
-    venv\Scripts\activate
-    
-  - On macOS/Linux:
-    
-    source venv/bin/activate
-    
-
-3. *Install Dependencies*:
+2. *Install Dependencies*:
 
 - The system requires the following Python libraries:
   - pandas: Data manipulation and analysis
@@ -81,7 +55,7 @@ This manual provides instructions for downloading, setting up, and using the sys
   
   pip install pandas openpyxl
   
-- The other packages (datetime, random, collections, csv, json, os, traceback) are part of Python's standard library and don't need separate installation.
+- The other packages (datetime, random, csv, json, os, traceback) are part of Python's standard library and don't need separate installation.
 
 - Alternatively, if a requirements.txt file is provided, run:
   
@@ -90,7 +64,7 @@ This manual provides instructions for downloading, setting up, and using the sys
 
 4. *Place Configuration Files*:
 
-- Ensure the required input files (combined.csv and rooms.csv) are in the project directory (see Section 4 for details).
+- Ensure the required input files (combined.csv, rooms.csv and config.json) are in the project directory (see Section 4 for details).
 
 5. *Run the Application*:
 
@@ -109,7 +83,7 @@ This manual provides instructions for downloading, setting up, and using the sys
 
 ### 4. Setting Up Configuration Files
 
-The system requires two input files to operate: combined.csv and rooms.csv. These files must be placed in the project directory.
+The system requires three input files to operate: combined.csv, rooms.csv, config.json. These files must be placed in the inputs folder directory.
 
 #### Required Configuration Files
 
