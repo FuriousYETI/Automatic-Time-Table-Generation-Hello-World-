@@ -149,6 +149,17 @@ The system requires two input files to operate: combined.csv and rooms.csv. Thes
   - type: Room type (LECTURE_ROOM, COMPUTER_LAB, HARDWARE_LAB, SEATER_120, SEATER_240).
   - capacity: Maximum number of students the room can accommodate.
 
+3. *config.json*:
+- *Purpose*: Contains default scheduling settings used.
+- *Format (example):
+  {
+  "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+  "LECTURE_MIN": 90,
+  "LAB_MIN": 120,
+  "TUTORIAL_MIN": 60,
+  "SELF_STUDY_MIN": 60
+}
+
 #### Steps to Configure
 
 1. Place combined.csv and rooms.csv in the project directory (same folder as the script).
