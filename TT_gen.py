@@ -1043,7 +1043,7 @@ def exam_generator():
     faculty_list = [f.strip() for f in faculty_list if f.strip()]
 
     # --- Dates setup ---
-    session_title = "AN: 03:00 PM to 04:30 PM"
+    session_title = "Jan-April 03:00 PM to 04:30 PM"
     start_date = datetime(2025, 11, 20)
     num_days = min(10, len(df_courses))
     dates = [start_date + timedelta(days=i) for i in range(num_days)]
