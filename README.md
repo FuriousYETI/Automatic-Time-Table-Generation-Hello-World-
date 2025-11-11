@@ -71,11 +71,11 @@ This manual provides instructions for downloading, setting up, and using the sys
   - openpyxl: Reading/writing Excel files
   - datetime: Date and time manipulation
   - random: Random number generation
-  - collections: Special container datatypes (e.g., defaultdict)
   - csv: CSV file reading/writing
   - json: JSON data manipulation
   - os: Operating system interfaces
   - traceback: Stack trace extraction for error reporting
+  - dataclasses: declare data containers 
 
 - Install the main dependencies using:
   
@@ -231,7 +231,7 @@ The current version satisfies the following requirements:
 
 The following features are planned for future versions:
 
-- *UI Development*: Add a user interface (e.g., Flask web app or Tkinter desktop app) to allow coordinators, faculty, and students to interact with the system directly.
+
 - *Exam Scheduling (REQ-15-EXAM)*: Implement exam timetable scheduling with seating arrangements and minimize exam days.
 - *Analytics Reports (REQ-16-ANALYTICS)*: Enhance reports on room usage, instructor effort, and student effort.
 - *Faculty Preferences (REQ-11-FACULTY)*: Improve incorporation of faculty scheduling preferences (e.g., preferred days/times).
