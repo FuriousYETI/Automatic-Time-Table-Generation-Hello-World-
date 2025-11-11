@@ -12,7 +12,6 @@ from openpyxl.utils import get_column_letter
 from dataclasses import dataclass
 import traceback
 import os
-import sys
 import json
 
 
