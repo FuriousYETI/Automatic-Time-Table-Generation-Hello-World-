@@ -101,7 +101,8 @@ This manual provides instructions for downloading, setting up, and using the sys
 - The script will generate:
   - timetable_all_departments.xlsx - The main timetable file with all department schedules
   - unscheduled_courses.xlsx - Report of courses that couldn't be fully scheduled
-  - all_faculty_timetables.xlsx - Individual schedules for all faculty members
+  - teacher_timetables.xlsx - Individual schedules for all faculty members
+  - Exam_timetable.xlsx - The exam timetable for Jan-April session
 - *Screenshot Placeholder*: [Insert screenshot of the terminal showing the python TT_gen.py command and the output messages]
 
 ---
