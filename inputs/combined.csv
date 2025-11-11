@@ -93,3 +93,9 @@ CSE,4,ELE003,Elective,3,0,0,0,2,xxx,Yes,70
 DSAI,2,ELE001,Elective,3,0,0,0,2,xxx,Yes,70
 DSAI,6,ELE002,Elective,3,0,0,0,2,xxx,Yes,70
 DSAI,4,ELE003,Elective,3,0,0,0,2,xxx,Yes,70
+ECE,2,MA201,Linear Algebra,3,1,0,0,2,Dr. Somen Bhattacharjee,Yes,70
+ECE,2,MA202,Optimization,3,1,0,0,2,Dr. Dibyajyothi Guha,Yes,70
+ECE,2,EC201,Computer Architecture,3,0,2,0,2,Dr. Jagadish D N,Yes,70
+ECE,2,HS201,English Language and Communication,3,0,0,0,3,Dr. Rajesh N S,Yes,70
+ECE,2,CS201,Data Structures and Algorithms,3,0,2,0,4,Dr. Prabhu Prasad,Yes,70
+ECE,2,EC202,Network Analysis,2,1,0,0,3,Dr. Sibasankar Padhy,Yes,70
